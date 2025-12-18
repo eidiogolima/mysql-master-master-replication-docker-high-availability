@@ -1,10 +1,10 @@
-# 🐳 MySQL Master x Master Replication
+# 🐳 MySQL Master x Master Replicación
 
-Bidirectional MySQL replication with Docker Compose using GTID (Global Transaction IDs).
+Replicación bidireccional MySQL con Docker Compose usando GTID (Global Transaction IDs).
 
-## 🚀 Quick Start
+## 🚀 Inicio Rápido
 
-### Development
+### Desarrollo
 ```bash
 cd dev/
 docker-compose up -d
@@ -12,7 +12,7 @@ docker-compose up -d
 ./check-replication.sh
 ```
 
-### Production
+### Producción
 ```bash
 # Server 1
 cd prod/server-1/
@@ -25,15 +25,15 @@ docker-compose up -d
 cd exec && ./setup-replication.sh 192.168.1.10
 ```
 
-## 📁 Structure
+## 📁 Estructura
 
 ```
-├── dev/                    # Development (local)
+├── dev/                    # Desarrollo (local)
 │   ├── docker-compose.yml
 │   ├── setup-replication.sh
 │   └── check-replication.sh
 │
-└── prod/                   # Production (separate servers)
+└── prod/                   # Producción (servidores separados)
     ├── server-1/           # Master 1 (192.168.1.10)
     │   ├── docker-compose.yml
     │   ├── mysql/my-config-1.cnf
@@ -45,7 +45,7 @@ cd exec && ./setup-replication.sh 192.168.1.10
         └── exec/setup-replication.sh
 ```
 
-## 🔧 Essential Configuration
+## 🔧 Configuración Esencial
 
 ### my-config-1.cnf (Master 1)
 ```ini
@@ -71,47 +71,47 @@ enforce_gtid_consistency = ON
 binlog_expire_logs_seconds = 604800
 ```
 
-## 🔐 Default Credentials
+## 🔐 Credenciales Predeterminadas
 
 - **Root**: `root` / `teste123`
-- **Replication**: `replicador` / `teste123`
+- **Replicación**: `replicador` / `teste123`
 - **phpMyAdmin**: http://localhost:8085
 
-⚠️ **Change in production!**
+⚠️ **¡Cambiar en producción!**
 
-## 📊 Check Status
+## 📊 Verificar Estado
 
 ```bash
-# Use project script
+# Usar script del proyecto
 ./check-replication.sh
 
-# Or manually
+# O manualmente
 docker exec mysql-master-1 mysql -uroot -pteste123 -e "SHOW SLAVE STATUS\G" | grep -E "(Slave_IO_Running|Slave_SQL_Running|Seconds_Behind_Master)"
 ```
 
-**Expected status:**
+**Estado esperado:**
 ```
 Slave_IO_Running: Yes
 Slave_SQL_Running: Yes
 Seconds_Behind_Master: 0
 ```
 
-## 🚨 Troubleshooting
+## 🚨 Solución de Problemas
 
-### Replication not connecting
+### La replicación no conecta
 ```bash
-# Check network
+# Verificar red
 ping 192.168.1.20
 
-# View logs
+# Ver logs
 docker logs mysql-master-1 | tail -50
 
-# Reconfigure
+# Reconfigurar
 cd prod/server-1/exec
 ./setup-replication.sh 192.168.1.20
 ```
 
-### Reset replication
+### Resetear replicación
 ```bash
 docker exec mysql-master-1 mysql -uroot -pteste123 -e "
 STOP SLAVE; 
@@ -120,50 +120,50 @@ RESET SLAVE ALL;
 cd exec && ./setup-replication.sh 192.168.1.20
 ```
 
-## 🔄 Bidirectional Replication
+## 🔄 Replicación Bidireccional
 
 ```
-Master 1 (ID: 1, odd IDs)  ⟷  Master 2 (ID: 2, even IDs)
-      GTID-based replication
+Master 1 (ID: 1, IDs impares)  ⟷  Master 2 (ID: 2, IDs pares)
+      Replicación basada en GTID
 ```
 
-- ✅ Auto-increment prevents PK conflicts
-- ✅ GTID ensures consistency
-- ✅ Synchronization < 5 seconds
+- ✅ Auto-increment previene conflictos de clave primaria
+- ✅ GTID garantiza consistencia
+- ✅ Sincronización < 5 segundos
 
-## 🔐 Security (Production)
+## 🔐 Seguridad (Producción)
 
 ```bash
 # Firewall
 sudo ufw allow from 192.168.1.20 to any port 3306
 sudo ufw deny 3306
 
-# SSL (recommended)
-# See .github/copilot-instructions.md for SSL configuration
+# SSL (recomendado)
+# Ver .github/copilot-instructions.md para configuración SSL
 ```
 
-## 💾 Backup
+## 💾 Respaldo
 
 ```bash
 # Backup
 docker exec mysql-master-1 mysqldump -uroot -pteste123 --all-databases > backup.sql
 
-# Restore
+# Restaurar
 docker exec -i mysql-master-1 mysql -uroot -pteste123 < backup.sql
 ```
 
-## 🧪 Test Resilience
+## 🧪 Probar Resiliencia
 
 ```bash
 cd dev/
 ./test-failover-resilience.sh
 ```
 
-## 📚 Additional Documentation
+## 📚 Documentación Adicional
 
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Common problems and solutions
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Problemas comunes y soluciones
 
 ---
 
-**Version**: 1.0  
-**Last update**: December 17, 2025
+**Versión**: 1.0  
+**Última actualización**: 17 de diciembre de 2025

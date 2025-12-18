@@ -1,10 +1,10 @@
-# 🐳 MySQL Master x Master Replication
+# 🐳 MySQL Master x Master Репликация
 
-Bidirectional MySQL replication with Docker Compose using GTID (Global Transaction IDs).
+Двунаправленная репликация MySQL с Docker Compose использующая GTID (Global Transaction IDs).
 
-## 🚀 Quick Start
+## 🚀 Быстрый старт
 
-### Development
+### Разработка
 ```bash
 cd dev/
 docker-compose up -d
@@ -12,7 +12,7 @@ docker-compose up -d
 ./check-replication.sh
 ```
 
-### Production
+### Продакшн
 ```bash
 # Server 1
 cd prod/server-1/
@@ -25,15 +25,15 @@ docker-compose up -d
 cd exec && ./setup-replication.sh 192.168.1.10
 ```
 
-## 📁 Structure
+## 📁 Структура
 
 ```
-├── dev/                    # Development (local)
+├── dev/                    # Разработка (локально)
 │   ├── docker-compose.yml
 │   ├── setup-replication.sh
 │   └── check-replication.sh
 │
-└── prod/                   # Production (separate servers)
+└── prod/                   # Продакшн (отдельные серверы)
     ├── server-1/           # Master 1 (192.168.1.10)
     │   ├── docker-compose.yml
     │   ├── mysql/my-config-1.cnf
@@ -45,7 +45,7 @@ cd exec && ./setup-replication.sh 192.168.1.10
         └── exec/setup-replication.sh
 ```
 
-## 🔧 Essential Configuration
+## 🔧 Основная конфигурация
 
 ### my-config-1.cnf (Master 1)
 ```ini
@@ -71,47 +71,47 @@ enforce_gtid_consistency = ON
 binlog_expire_logs_seconds = 604800
 ```
 
-## 🔐 Default Credentials
+## 🔐 Учетные данные по умолчанию
 
 - **Root**: `root` / `teste123`
-- **Replication**: `replicador` / `teste123`
+- **Репликация**: `replicador` / `teste123`
 - **phpMyAdmin**: http://localhost:8085
 
-⚠️ **Change in production!**
+⚠️ **Измените в продакшне!**
 
-## 📊 Check Status
+## 📊 Проверка статуса
 
 ```bash
-# Use project script
+# Использовать скрипт проекта
 ./check-replication.sh
 
-# Or manually
+# Или вручную
 docker exec mysql-master-1 mysql -uroot -pteste123 -e "SHOW SLAVE STATUS\G" | grep -E "(Slave_IO_Running|Slave_SQL_Running|Seconds_Behind_Master)"
 ```
 
-**Expected status:**
+**Ожидаемый статус:**
 ```
 Slave_IO_Running: Yes
 Slave_SQL_Running: Yes
 Seconds_Behind_Master: 0
 ```
 
-## 🚨 Troubleshooting
+## 🚨 Устранение неполадок
 
-### Replication not connecting
+### Репликация не подключается
 ```bash
-# Check network
+# Проверить сеть
 ping 192.168.1.20
 
-# View logs
+# Просмотреть логи
 docker logs mysql-master-1 | tail -50
 
-# Reconfigure
+# Переконфигурировать
 cd prod/server-1/exec
 ./setup-replication.sh 192.168.1.20
 ```
 
-### Reset replication
+### Сброс репликации
 ```bash
 docker exec mysql-master-1 mysql -uroot -pteste123 -e "
 STOP SLAVE; 
@@ -120,50 +120,50 @@ RESET SLAVE ALL;
 cd exec && ./setup-replication.sh 192.168.1.20
 ```
 
-## 🔄 Bidirectional Replication
+## 🔄 Двунаправленная репликация
 
 ```
-Master 1 (ID: 1, odd IDs)  ⟷  Master 2 (ID: 2, even IDs)
-      GTID-based replication
+Master 1 (ID: 1, нечетные ID)  ⟷  Master 2 (ID: 2, четные ID)
+      Репликация на основе GTID
 ```
 
-- ✅ Auto-increment prevents PK conflicts
-- ✅ GTID ensures consistency
-- ✅ Synchronization < 5 seconds
+- ✅ Auto-increment предотвращает конфликты первичных ключей
+- ✅ GTID гарантирует согласованность
+- ✅ Синхронизация < 5 секунд
 
-## 🔐 Security (Production)
+## 🔐 Безопасность (Продакшн)
 
 ```bash
-# Firewall
+# Файрвол
 sudo ufw allow from 192.168.1.20 to any port 3306
 sudo ufw deny 3306
 
-# SSL (recommended)
-# See .github/copilot-instructions.md for SSL configuration
+# SSL (рекомендуется)
+# См. .github/copilot-instructions.md для настройки SSL
 ```
 
-## 💾 Backup
+## 💾 Резервное копирование
 
 ```bash
-# Backup
+# Бэкап
 docker exec mysql-master-1 mysqldump -uroot -pteste123 --all-databases > backup.sql
 
-# Restore
+# Восстановление
 docker exec -i mysql-master-1 mysql -uroot -pteste123 < backup.sql
 ```
 
-## 🧪 Test Resilience
+## 🧪 Тест устойчивости
 
 ```bash
 cd dev/
 ./test-failover-resilience.sh
 ```
 
-## 📚 Additional Documentation
+## 📚 Дополнительная документация
 
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Common problems and solutions
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Распространенные проблемы и решения
 
 ---
 
-**Version**: 1.0  
-**Last update**: December 17, 2025
+**Версия**: 1.0  
+**Последнее обновление**: 17 декабря 2025

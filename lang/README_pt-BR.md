@@ -1,10 +1,10 @@
 # 🐳 MySQL Master x Master Replication
 
-Bidirectional MySQL replication with Docker Compose using GTID (Global Transaction IDs).
+Replicação bidirecional MySQL com Docker Compose usando GTID (Global Transaction IDs).
 
 ## 🚀 Quick Start
 
-### Development
+### Desenvolvimento
 ```bash
 cd dev/
 docker-compose up -d
@@ -12,7 +12,7 @@ docker-compose up -d
 ./check-replication.sh
 ```
 
-### Production
+### Produção
 ```bash
 # Server 1
 cd prod/server-1/
@@ -25,15 +25,15 @@ docker-compose up -d
 cd exec && ./setup-replication.sh 192.168.1.10
 ```
 
-## 📁 Structure
+## 📁 Estrutura
 
 ```
-├── dev/                    # Development (local)
+├── dev/                    # Desenvolvimento (local)
 │   ├── docker-compose.yml
 │   ├── setup-replication.sh
 │   └── check-replication.sh
 │
-└── prod/                   # Production (separate servers)
+└── prod/                   # Produção (servidores separados)
     ├── server-1/           # Master 1 (192.168.1.10)
     │   ├── docker-compose.yml
     │   ├── mysql/my-config-1.cnf
@@ -45,7 +45,7 @@ cd exec && ./setup-replication.sh 192.168.1.10
         └── exec/setup-replication.sh
 ```
 
-## 🔧 Essential Configuration
+## 🔧 Configuração Essencial
 
 ### my-config-1.cnf (Master 1)
 ```ini
@@ -71,25 +71,25 @@ enforce_gtid_consistency = ON
 binlog_expire_logs_seconds = 604800
 ```
 
-## 🔐 Default Credentials
+## 🔐 Credenciais Padrão
 
 - **Root**: `root` / `teste123`
-- **Replication**: `replicador` / `teste123`
+- **Replicação**: `replicador` / `teste123`
 - **phpMyAdmin**: http://localhost:8085
 
-⚠️ **Change in production!**
+⚠️ **Altere em produção!**
 
-## 📊 Check Status
+## 📊 Verificar Status
 
 ```bash
-# Use project script
+# Usar script do projeto
 ./check-replication.sh
 
-# Or manually
+# Ou manualmente
 docker exec mysql-master-1 mysql -uroot -pteste123 -e "SHOW SLAVE STATUS\G" | grep -E "(Slave_IO_Running|Slave_SQL_Running|Seconds_Behind_Master)"
 ```
 
-**Expected status:**
+**Status esperado:**
 ```
 Slave_IO_Running: Yes
 Slave_SQL_Running: Yes
@@ -98,20 +98,20 @@ Seconds_Behind_Master: 0
 
 ## 🚨 Troubleshooting
 
-### Replication not connecting
+### Replicação não conecta
 ```bash
-# Check network
+# Verificar rede
 ping 192.168.1.20
 
-# View logs
+# Ver logs
 docker logs mysql-master-1 | tail -50
 
-# Reconfigure
+# Reconfigurar
 cd prod/server-1/exec
 ./setup-replication.sh 192.168.1.20
 ```
 
-### Reset replication
+### Resetar replicação
 ```bash
 docker exec mysql-master-1 mysql -uroot -pteste123 -e "
 STOP SLAVE; 
@@ -120,26 +120,26 @@ RESET SLAVE ALL;
 cd exec && ./setup-replication.sh 192.168.1.20
 ```
 
-## 🔄 Bidirectional Replication
+## 🔄 Replicação Bidirecional
 
 ```
-Master 1 (ID: 1, odd IDs)  ⟷  Master 2 (ID: 2, even IDs)
+Master 1 (ID: 1, IDs ímpares)  ⟷  Master 2 (ID: 2, IDs pares)
       GTID-based replication
 ```
 
-- ✅ Auto-increment prevents PK conflicts
-- ✅ GTID ensures consistency
-- ✅ Synchronization < 5 seconds
+- ✅ Auto-increment previne conflitos de PK
+- ✅ GTID garante consistência
+- ✅ Sincronização < 5 segundos
 
-## 🔐 Security (Production)
+## 🔐 Segurança (Produção)
 
 ```bash
 # Firewall
 sudo ufw allow from 192.168.1.20 to any port 3306
 sudo ufw deny 3306
 
-# SSL (recommended)
-# See .github/copilot-instructions.md for SSL configuration
+# SSL (recomendado)
+# Ver .github/copilot-instructions.md para configuração SSL
 ```
 
 ## 💾 Backup
@@ -152,18 +152,18 @@ docker exec mysql-master-1 mysqldump -uroot -pteste123 --all-databases > backup.
 docker exec -i mysql-master-1 mysql -uroot -pteste123 < backup.sql
 ```
 
-## 🧪 Test Resilience
+## 🧪 Testar Resiliência
 
 ```bash
 cd dev/
 ./test-failover-resilience.sh
 ```
 
-## 📚 Additional Documentation
+## 📚 Documentação Adicional
 
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Common problems and solutions
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Problemas comuns e soluções
 
 ---
 
-**Version**: 1.0  
-**Last update**: December 17, 2025
+**Versão**: 1.0  
+**Última atualização**: 17 de dezembro de 2025

@@ -1,10 +1,10 @@
-# 🐳 MySQL Master x Master Replication
+# 🐳 MySQL Master x Master レプリケーション
 
-Bidirectional MySQL replication with Docker Compose using GTID (Global Transaction IDs).
+GTID（グローバルトランザクションID）を使用したDocker ComposeによるMySQL双方向レプリケーション。
 
-## 🚀 Quick Start
+## 🚀 クイックスタート
 
-### Development
+### 開発環境
 ```bash
 cd dev/
 docker-compose up -d
@@ -12,7 +12,7 @@ docker-compose up -d
 ./check-replication.sh
 ```
 
-### Production
+### 本番環境
 ```bash
 # Server 1
 cd prod/server-1/
@@ -25,15 +25,15 @@ docker-compose up -d
 cd exec && ./setup-replication.sh 192.168.1.10
 ```
 
-## 📁 Structure
+## 📁 ディレクトリ構造
 
 ```
-├── dev/                    # Development (local)
+├── dev/                    # 開発環境（ローカル）
 │   ├── docker-compose.yml
 │   ├── setup-replication.sh
 │   └── check-replication.sh
 │
-└── prod/                   # Production (separate servers)
+└── prod/                   # 本番環境（分離サーバー）
     ├── server-1/           # Master 1 (192.168.1.10)
     │   ├── docker-compose.yml
     │   ├── mysql/my-config-1.cnf
@@ -45,7 +45,7 @@ cd exec && ./setup-replication.sh 192.168.1.10
         └── exec/setup-replication.sh
 ```
 
-## 🔧 Essential Configuration
+## 🔧 必須設定
 
 ### my-config-1.cnf (Master 1)
 ```ini
@@ -71,47 +71,47 @@ enforce_gtid_consistency = ON
 binlog_expire_logs_seconds = 604800
 ```
 
-## 🔐 Default Credentials
+## 🔐 デフォルト認証情報
 
 - **Root**: `root` / `teste123`
-- **Replication**: `replicador` / `teste123`
+- **レプリケーション**: `replicador` / `teste123`
 - **phpMyAdmin**: http://localhost:8085
 
-⚠️ **Change in production!**
+⚠️ **本番環境では変更してください！**
 
-## 📊 Check Status
+## 📊 ステータス確認
 
 ```bash
-# Use project script
+# プロジェクトスクリプトを使用
 ./check-replication.sh
 
-# Or manually
+# または手動で確認
 docker exec mysql-master-1 mysql -uroot -pteste123 -e "SHOW SLAVE STATUS\G" | grep -E "(Slave_IO_Running|Slave_SQL_Running|Seconds_Behind_Master)"
 ```
 
-**Expected status:**
+**期待されるステータス:**
 ```
 Slave_IO_Running: Yes
 Slave_SQL_Running: Yes
 Seconds_Behind_Master: 0
 ```
 
-## 🚨 Troubleshooting
+## 🚨 トラブルシューティング
 
-### Replication not connecting
+### レプリケーションが接続できない
 ```bash
-# Check network
+# ネットワークを確認
 ping 192.168.1.20
 
-# View logs
+# ログを確認
 docker logs mysql-master-1 | tail -50
 
-# Reconfigure
+# 再設定
 cd prod/server-1/exec
 ./setup-replication.sh 192.168.1.20
 ```
 
-### Reset replication
+### レプリケーションをリセット
 ```bash
 docker exec mysql-master-1 mysql -uroot -pteste123 -e "
 STOP SLAVE; 
@@ -120,50 +120,50 @@ RESET SLAVE ALL;
 cd exec && ./setup-replication.sh 192.168.1.20
 ```
 
-## 🔄 Bidirectional Replication
+## 🔄 双方向レプリケーション
 
 ```
-Master 1 (ID: 1, odd IDs)  ⟷  Master 2 (ID: 2, even IDs)
-      GTID-based replication
+Master 1 (ID: 1, 奇数ID)  ⟷  Master 2 (ID: 2, 偶数ID)
+      GTIDベースのレプリケーション
 ```
 
-- ✅ Auto-increment prevents PK conflicts
-- ✅ GTID ensures consistency
-- ✅ Synchronization < 5 seconds
+- ✅ 自動インクリメントがPK競合を防止
+- ✅ GTIDが一貫性を保証
+- ✅ 同期時間 < 5秒
 
-## 🔐 Security (Production)
+## 🔐 セキュリティ（本番環境）
 
 ```bash
-# Firewall
+# ファイアウォール
 sudo ufw allow from 192.168.1.20 to any port 3306
 sudo ufw deny 3306
 
-# SSL (recommended)
-# See .github/copilot-instructions.md for SSL configuration
+# SSL（推奨）
+# SSL設定については .github/copilot-instructions.md を参照
 ```
 
-## 💾 Backup
+## 💾 バックアップ
 
 ```bash
-# Backup
+# バックアップ
 docker exec mysql-master-1 mysqldump -uroot -pteste123 --all-databases > backup.sql
 
-# Restore
+# リストア
 docker exec -i mysql-master-1 mysql -uroot -pteste123 < backup.sql
 ```
 
-## 🧪 Test Resilience
+## 🧪 回復力テスト
 
 ```bash
 cd dev/
 ./test-failover-resilience.sh
 ```
 
-## 📚 Additional Documentation
+## 📚 追加ドキュメント
 
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Common problems and solutions
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - 一般的な問題と解決策
 
 ---
 
-**Version**: 1.0  
-**Last update**: December 17, 2025
+**バージョン**: 1.0  
+**最終更新**: 2025年12月17日

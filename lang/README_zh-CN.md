@@ -1,10 +1,10 @@
-# 🐳 MySQL Master x Master Replication
+# 🐳 MySQL Master x Master 复制
 
-Bidirectional MySQL replication with Docker Compose using GTID (Global Transaction IDs).
+使用 Docker Compose 和 GTID（全局事务ID）实现的 MySQL 双向复制。
 
-## 🚀 Quick Start
+## 🚀 快速开始
 
-### Development
+### 开发环境
 ```bash
 cd dev/
 docker-compose up -d
@@ -12,7 +12,7 @@ docker-compose up -d
 ./check-replication.sh
 ```
 
-### Production
+### 生产环境
 ```bash
 # Server 1
 cd prod/server-1/
@@ -25,15 +25,15 @@ docker-compose up -d
 cd exec && ./setup-replication.sh 192.168.1.10
 ```
 
-## 📁 Structure
+## 📁 目录结构
 
 ```
-├── dev/                    # Development (local)
+├── dev/                    # 开发环境（本地）
 │   ├── docker-compose.yml
 │   ├── setup-replication.sh
 │   └── check-replication.sh
 │
-└── prod/                   # Production (separate servers)
+└── prod/                   # 生产环境（独立服务器）
     ├── server-1/           # Master 1 (192.168.1.10)
     │   ├── docker-compose.yml
     │   ├── mysql/my-config-1.cnf
@@ -45,7 +45,7 @@ cd exec && ./setup-replication.sh 192.168.1.10
         └── exec/setup-replication.sh
 ```
 
-## 🔧 Essential Configuration
+## 🔧 核心配置
 
 ### my-config-1.cnf (Master 1)
 ```ini
@@ -71,47 +71,47 @@ enforce_gtid_consistency = ON
 binlog_expire_logs_seconds = 604800
 ```
 
-## 🔐 Default Credentials
+## 🔐 默认凭证
 
 - **Root**: `root` / `teste123`
-- **Replication**: `replicador` / `teste123`
+- **复制用户**: `replicador` / `teste123`
 - **phpMyAdmin**: http://localhost:8085
 
-⚠️ **Change in production!**
+⚠️ **生产环境请更改密码！**
 
-## 📊 Check Status
+## 📊 检查状态
 
 ```bash
-# Use project script
+# 使用项目脚本
 ./check-replication.sh
 
-# Or manually
+# 或手动检查
 docker exec mysql-master-1 mysql -uroot -pteste123 -e "SHOW SLAVE STATUS\G" | grep -E "(Slave_IO_Running|Slave_SQL_Running|Seconds_Behind_Master)"
 ```
 
-**Expected status:**
+**预期状态:**
 ```
 Slave_IO_Running: Yes
 Slave_SQL_Running: Yes
 Seconds_Behind_Master: 0
 ```
 
-## 🚨 Troubleshooting
+## 🚨 故障排除
 
-### Replication not connecting
+### 复制无法连接
 ```bash
-# Check network
+# 检查网络
 ping 192.168.1.20
 
-# View logs
+# 查看日志
 docker logs mysql-master-1 | tail -50
 
-# Reconfigure
+# 重新配置
 cd prod/server-1/exec
 ./setup-replication.sh 192.168.1.20
 ```
 
-### Reset replication
+### 重置复制
 ```bash
 docker exec mysql-master-1 mysql -uroot -pteste123 -e "
 STOP SLAVE; 
@@ -120,50 +120,50 @@ RESET SLAVE ALL;
 cd exec && ./setup-replication.sh 192.168.1.20
 ```
 
-## 🔄 Bidirectional Replication
+## 🔄 双向复制
 
 ```
-Master 1 (ID: 1, odd IDs)  ⟷  Master 2 (ID: 2, even IDs)
-      GTID-based replication
+Master 1 (ID: 1, 奇数IDs)  ⟷  Master 2 (ID: 2, 偶数IDs)
+      基于 GTID 的复制
 ```
 
-- ✅ Auto-increment prevents PK conflicts
-- ✅ GTID ensures consistency
-- ✅ Synchronization < 5 seconds
+- ✅ 自动增量防止主键冲突
+- ✅ GTID 保证一致性
+- ✅ 同步延迟 < 5 秒
 
-## 🔐 Security (Production)
+## 🔐 安全配置（生产环境）
 
 ```bash
-# Firewall
+# 防火墙
 sudo ufw allow from 192.168.1.20 to any port 3306
 sudo ufw deny 3306
 
-# SSL (recommended)
-# See .github/copilot-instructions.md for SSL configuration
+# SSL（推荐）
+# 参考 .github/copilot-instructions.md 配置 SSL
 ```
 
-## 💾 Backup
+## 💾 备份
 
 ```bash
-# Backup
+# 备份
 docker exec mysql-master-1 mysqldump -uroot -pteste123 --all-databases > backup.sql
 
-# Restore
+# 恢复
 docker exec -i mysql-master-1 mysql -uroot -pteste123 < backup.sql
 ```
 
-## 🧪 Test Resilience
+## 🧪 测试弹性
 
 ```bash
 cd dev/
 ./test-failover-resilience.sh
 ```
 
-## 📚 Additional Documentation
+## 📚 其他文档
 
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Common problems and solutions
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - 常见问题和解决方案
 
 ---
 
-**Version**: 1.0  
-**Last update**: December 17, 2025
+**版本**: 1.0  
+**最后更新**: 2025年12月17日
