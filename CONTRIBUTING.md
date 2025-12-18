@@ -33,13 +33,13 @@ Thank you for your interest in contributing to this project! This document provi
 1. Fork the repository on GitHub
 2. Clone your fork locally:
 ```bash
-git clone https://github.com/YOUR_USERNAME/mysql-master-x-master-replication-docker.git
-cd mysql-master-x-master-replication-docker
+git clone https://github.com/YOUR_USERNAME/mysql-master-master-replication-docker-high-availability.git
+cd mysql-master-master-replication-docker-high-availability
 ```
 
 3. Add upstream remote:
 ```bash
-git remote add upstream https://github.com/eidiogolima/mysql-master-x-master-replication-docker.git
+git remote add upstream https://github.com/eidiogolima/mysql-master-master-replication-docker-high-availability.git
 ```
 
 ## 🌿 Branch Strategy
